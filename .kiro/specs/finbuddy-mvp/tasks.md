@@ -137,39 +137,60 @@
     - Handle loading and error states
     - _Requirements: 2.2, 4.3, 4.5_
 
-- [ ] 7. Build dashboard visualization components
-  - [ ] 7.1 Create MonthlySummary component
+- [x] 7. Build dashboard visualization components
+
+
+
+
+
+  - [x] 7.1 Create MonthlySummary component
+
+
     - Calculate total spending for current month
     - Display formatted currency value
     - Update when month changes
     - _Requirements: 5.1, 5.2, 5.3, 5.4_
-  - [ ] 7.2 Create ExpenseChart pie chart component
+  - [x] 7.2 Create ExpenseChart pie chart component
+
+
     - Aggregate expenses by category for current month
     - Render pie chart using Recharts
     - Display category labels and percentages
     - Show empty state when no data
     - _Requirements: 6.1, 6.2, 6.3, 6.4_
-  - [ ] 7.3 Create SpendingTrend line chart component
+  - [x] 7.3 Create SpendingTrend line chart component
+
+
     - Aggregate daily totals for last 30 days
     - Render line chart using Recharts with date x-axis
     - Add tooltip showing date and amount
     - Show empty state when no data
     - _Requirements: 7.1, 7.2, 7.3, 7.4_
 
-- [ ] 8. Integrate Google Gemini AI insights
-  - [ ] 8.1 Create Gemini API client in lib/gemini.ts
+- [x] 8. Integrate Google Gemini AI insights
+
+
+
+
+  - [x] 8.1 Create Gemini API client in lib/gemini.ts
+
+
     - Initialize GoogleGenerativeAI with API key
     - Create getSpendingInsights function
     - Format prompt with expense data and instructions
     - Handle API response and errors
     - _Requirements: 8.2, 8.3_
-  - [ ] 8.2 Create POST /api/insights endpoint
+  - [x] 8.2 Create POST /api/insights endpoint
+
+
     - Accept expense data in request body
     - Call Gemini API via lib/gemini.ts
     - Return AI-generated insights text
     - Implement error handling and timeout
     - _Requirements: 8.2, 8.3, 8.4, 8.5_
-  - [ ] 8.3 Create AIInsights component
+  - [x] 8.3 Create AIInsights component
+
+
     - Add button to trigger insights generation
     - Display loading state during API call
     - Render formatted AI response text
