@@ -72,42 +72,66 @@
     - Add protected route logic for dashboard access
     - _Requirements: 1.4, 10.4_
 
-- [ ] 5. Build expense CRUD API routes
-  - [ ] 5.1 Create POST /api/expenses endpoint
+- [x] 5. Build expense CRUD API routes
+
+
+
+
+
+
+  - [x] 5.1 Create POST /api/expenses endpoint
+
     - Implement expense creation with user_id association
     - Add server-side validation for required fields
     - Return created expense object
     - _Requirements: 2.2, 2.3_
-  - [ ] 5.2 Create GET /api/expenses endpoint
+
+  - [x] 5.2 Create GET /api/expenses endpoint
+
     - Fetch all expenses for authenticated user
     - Implement date range filtering via query params
     - Return sorted expense array
     - _Requirements: 3.1, 3.2_
-  - [ ] 5.3 Create PUT /api/expenses/[id] endpoint
+
+  - [x] 5.3 Create PUT /api/expenses/[id] endpoint
+
     - Implement expense update with ownership validation
     - Update expense record in database
     - Return updated expense object
     - _Requirements: 4.2, 4.3_
-  - [ ] 5.4 Create DELETE /api/expenses/[id] endpoint
+
+  - [x] 5.4 Create DELETE /api/expenses/[id] endpoint
+
     - Implement expense deletion with ownership validation
     - Remove expense from database
     - Return success status
     - _Requirements: 4.4, 4.5_
 
-- [ ] 6. Implement expense management UI components
-  - [ ] 6.1 Create ExpenseForm component
+- [x] 6. Implement expense management UI components
+
+
+
+
+
+  - [x] 6.1 Create ExpenseForm component
+
+
     - Build form with amount, category, date, note fields
     - Implement client-side validation
     - Add submit handler calling API routes
     - Support both create and edit modes
     - _Requirements: 2.1, 2.4, 2.5, 4.2_
-  - [ ] 6.2 Create ExpenseList component
+  - [x] 6.2 Create ExpenseList component
+
+
     - Display expenses in descending date order
     - Add edit and delete action buttons per expense
     - Implement optimistic UI updates
     - Show empty state when no expenses exist
     - _Requirements: 3.1, 3.2, 3.3, 3.4, 4.1_
-  - [ ] 6.3 Integrate ExpenseForm and ExpenseList
+  - [x] 6.3 Integrate ExpenseForm and ExpenseList
+
+
     - Wire form submission to create/update expenses
     - Refresh expense list after mutations
     - Handle loading and error states
