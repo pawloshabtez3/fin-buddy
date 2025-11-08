@@ -14,9 +14,10 @@ import {
 
 interface SpendingTrendProps {
   expenses: Expense[];
+  currency?: string;
 }
 
-export function SpendingTrend({ expenses }: SpendingTrendProps) {
+export function SpendingTrend({ expenses, currency = 'USD' }: SpendingTrendProps) {
   const chartData = useMemo(() => {
     const now = new Date();
     const thirtyDaysAgo = new Date(now);
@@ -58,7 +59,7 @@ export function SpendingTrend({ expenses }: SpendingTrendProps) {
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'USD',
+      currency: currency,
     }).format(value);
   };
 

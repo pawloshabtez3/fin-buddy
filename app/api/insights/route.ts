@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Call Gemini API with timeout handling
+    // Call Gemini API with error handling
     try {
       const insights = await getSpendingInsights(expenses);
       
@@ -53,29 +53,21 @@ export async function POST(request: NextRequest) {
         },
         { status: 200 }
       );
-    } catch (geminiError) {
+    } catch (geminiError: any) {
       console.error('Gemini API error:', geminiError);
       
-      // Handle specific error types
-      if (geminiError instanceof Error) {
-        if (geminiError.message.includes('timeout')) {
-          return NextResponse.json(
-            { error: 'Timeout Error', message: 'The AI service took too long to respond. Please try again.' },
-            { status: 504 }
-          );
-        }
-        
-        if (geminiError.message.includes('API key')) {
-          return NextResponse.json(
-            { error: 'Configuration Error', message: 'AI service is not properly configured' },
-            { status: 503 }
-          );
-        }
-      }
+      // Return error with appropriate status code
+      const statusCode = geminiError.statusCode || 500;
+      const errorType = geminiError.type || 'AI Service Error';
+      const message = geminiError.message || 'Failed to generate insights. Please try again later.';
       
       return NextResponse.json(
-        { error: 'AI Service Error', message: 'Failed to generate insights. Please try again later.' },
-        { status: 500 }
+        { 
+          error: errorType, 
+          message,
+          isRetryable: geminiError.isRetryable || false
+        },
+        { status: statusCode }
       );
     }
   } catch (error) {

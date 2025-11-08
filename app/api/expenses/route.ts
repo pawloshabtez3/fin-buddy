@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabaseServer';
-import { ExpenseInput, EXPENSE_CATEGORIES } from '@/lib/types';
+import { ExpenseInput } from '@/lib/types';
+import { validateExpenseInput, hasValidationErrors, getFirstValidationError } from '@/lib/validation';
+import { handleSupabaseError } from '@/lib/errors';
 
 // POST /api/expenses - Create new expense
 export async function POST(request: NextRequest) {
@@ -21,30 +23,11 @@ export async function POST(request: NextRequest) {
     const body: ExpenseInput = await request.json();
 
     // Server-side validation
-    if (!body.amount || typeof body.amount !== 'number' || body.amount <= 0) {
+    const validationErrors = validateExpenseInput(body);
+    if (hasValidationErrors(validationErrors)) {
+      const firstError = getFirstValidationError(validationErrors);
       return NextResponse.json(
-        { error: 'Validation Error', message: 'Amount is required and must be a positive number' },
-        { status: 400 }
-      );
-    }
-
-    if (!body.category || typeof body.category !== 'string') {
-      return NextResponse.json(
-        { error: 'Validation Error', message: 'Category is required' },
-        { status: 400 }
-      );
-    }
-
-    if (!EXPENSE_CATEGORIES.includes(body.category as any)) {
-      return NextResponse.json(
-        { error: 'Validation Error', message: 'Invalid category' },
-        { status: 400 }
-      );
-    }
-
-    if (!body.date || typeof body.date !== 'string') {
-      return NextResponse.json(
-        { error: 'Validation Error', message: 'Date is required' },
+        { error: 'Validation Error', message: firstError, errors: validationErrors },
         { status: 400 }
       );
     }
@@ -64,9 +47,10 @@ export async function POST(request: NextRequest) {
 
     if (insertError) {
       console.error('Error creating expense:', insertError);
+      const appError = handleSupabaseError(insertError);
       return NextResponse.json(
-        { error: 'Database Error', message: 'Failed to create expense' },
-        { status: 500 }
+        { error: appError.type, message: appError.message },
+        { status: appError.statusCode }
       );
     }
 
@@ -122,9 +106,10 @@ export async function GET(request: NextRequest) {
 
     if (fetchError) {
       console.error('Error fetching expenses:', fetchError);
+      const appError = handleSupabaseError(fetchError);
       return NextResponse.json(
-        { error: 'Database Error', message: 'Failed to fetch expenses' },
-        { status: 500 }
+        { error: appError.type, message: appError.message },
+        { status: appError.statusCode }
       );
     }
 

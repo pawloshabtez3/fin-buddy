@@ -2,15 +2,18 @@
 
 import { useState, useEffect } from 'react';
 import { Expense } from '@/lib/types';
+import { toast } from '@/lib/toast';
+import { parseError } from '@/lib/errors';
 
 interface ExpenseListProps {
   expenses: Expense[];
   onEdit: (expense: Expense) => void;
   onDelete: (id: string) => Promise<void>;
   isLoading?: boolean;
+  currency?: string;
 }
 
-export function ExpenseList({ expenses, onEdit, onDelete, isLoading = false }: ExpenseListProps) {
+export function ExpenseList({ expenses, onEdit, onDelete, isLoading = false, currency = 'USD' }: ExpenseListProps) {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [optimisticExpenses, setOptimisticExpenses] = useState<Expense[]>(expenses);
 
@@ -32,9 +35,12 @@ export function ExpenseList({ expenses, onEdit, onDelete, isLoading = false }: E
 
     try {
       await onDelete(id);
+      toast.success('Expense deleted successfully');
     } catch (error) {
       // Revert on error
       console.error('Error deleting expense:', error);
+      const { message } = parseError(error);
+      toast.error(message);
       setOptimisticExpenses(previousExpenses);
     } finally {
       setDeletingId(null);
@@ -53,7 +59,7 @@ export function ExpenseList({ expenses, onEdit, onDelete, isLoading = false }: E
   const formatAmount = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'USD',
+      currency: currency,
     }).format(amount);
   };
 

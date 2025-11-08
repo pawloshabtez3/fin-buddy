@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { AuthProvider } from "@/components/AuthProvider";
+import { Navigation } from "@/components/Navigation";
+import { ToastContainer } from "@/components/Toast";
 
 export const metadata: Metadata = {
   title: "FinBuddy - AI-Powered Personal Finance Assistant",
@@ -14,8 +16,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>
-        <AuthProvider>{children}</AuthProvider>
+      <body className="min-h-screen bg-gray-50">
+        <AuthProvider>
+          <Navigation />
+          {children}
+          <ToastContainer />
+        </AuthProvider>
       </body>
     </html>
   );

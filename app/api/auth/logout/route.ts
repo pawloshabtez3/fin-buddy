@@ -1,27 +1,16 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-
-export const dynamic = 'force-dynamic';
+import { createServerClient } from '@/lib/supabaseServer';
 
 export async function POST() {
   try {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-    if (!supabaseUrl || !supabaseAnonKey) {
-      return NextResponse.json(
-        { error: 'Server configuration error' },
-        { status: 500 }
-      );
-    }
-
-    const supabase = createClient(supabaseUrl, supabaseAnonKey);
+    const supabase = await createServerClient();
+    
     const { error } = await supabase.auth.signOut();
 
     if (error) {
       return NextResponse.json(
-        { error: error.message },
-        { status: 400 }
+        { error: 'Logout failed', message: error.message },
+        { status: 500 }
       );
     }
 
@@ -30,8 +19,9 @@ export async function POST() {
       { status: 200 }
     );
   } catch (error) {
+    console.error('Logout error:', error);
     return NextResponse.json(
-      { error: 'An unexpected error occurred' },
+      { error: 'Internal server error', message: 'Failed to logout' },
       { status: 500 }
     );
   }

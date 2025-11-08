@@ -83,3 +83,39 @@ export interface ApiResponse<T = any> {
   error?: string;
   message?: string;
 }
+
+// Error types for better error handling
+export enum ErrorType {
+  VALIDATION = 'Validation Error',
+  AUTHENTICATION = 'Unauthorized',
+  AUTHORIZATION = 'Forbidden',
+  NOT_FOUND = 'Not Found',
+  DATABASE = 'Database Error',
+  NETWORK = 'Network Error',
+  TIMEOUT = 'Timeout Error',
+  AI_SERVICE = 'AI Service Error',
+  CONFIGURATION = 'Configuration Error',
+  INTERNAL = 'Internal Server Error',
+}
+
+export class AppError extends Error {
+  constructor(
+    public type: ErrorType,
+    message: string,
+    public statusCode: number = 500,
+    public isRetryable: boolean = false
+  ) {
+    super(message);
+    this.name = 'AppError';
+  }
+}
+
+// Validation error details
+export interface ValidationError {
+  field: string;
+  message: string;
+}
+
+export interface ValidationErrors {
+  [field: string]: string;
+}

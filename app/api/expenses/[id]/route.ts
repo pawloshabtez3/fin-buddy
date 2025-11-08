@@ -1,25 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabaseServer';
-import { ExpenseInput, EXPENSE_CATEGORIES } from '@/lib/types';
+import { ExpenseInput } from '@/lib/types';
+import { validateExpenseInput, hasValidationErrors, getFirstValidationError } from '@/lib/validation';
+import { handleSupabaseError } from '@/lib/errors';
+import { withAuth } from '@/lib/auth-middleware';
 
 // PUT /api/expenses/[id] - Update expense
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  try {
+  return withAuth(request, async (user) => {
     const supabase = await createServerClient();
-
-    // Check authentication
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'Unauthorized', message: 'You must be logged in to update expenses' },
-        { status: 401 }
-      );
-    }
-
     const { id } = await params;
 
     // Verify ownership
@@ -31,8 +23,9 @@ export async function PUT(
       .single();
 
     if (fetchError || !existingExpense) {
+      const appError = handleSupabaseError(fetchError || new Error('Not found'));
       return NextResponse.json(
-        { error: 'Not Found', message: 'Expense not found or you do not have permission to update it' },
+        { error: appError.type, message: 'Expense not found or you do not have permission to update it' },
         { status: 404 }
       );
     }
@@ -40,32 +33,20 @@ export async function PUT(
     // Parse request body
     const body: Partial<ExpenseInput> = await request.json();
 
-    // Server-side validation
-    if (body.amount !== undefined) {
-      if (typeof body.amount !== 'number' || body.amount <= 0) {
-        return NextResponse.json(
-          { error: 'Validation Error', message: 'Amount must be a positive number' },
-          { status: 400 }
-        );
-      }
-    }
-
-    if (body.category !== undefined) {
-      if (typeof body.category !== 'string' || !EXPENSE_CATEGORIES.includes(body.category as any)) {
-        return NextResponse.json(
-          { error: 'Validation Error', message: 'Invalid category' },
-          { status: 400 }
-        );
-      }
-    }
-
-    if (body.date !== undefined) {
-      if (typeof body.date !== 'string') {
-        return NextResponse.json(
-          { error: 'Validation Error', message: 'Invalid date format' },
-          { status: 400 }
-        );
-      }
+    // Server-side validation for provided fields
+    const validationErrors = validateExpenseInput({
+      amount: body.amount ?? existingExpense.amount,
+      category: body.category ?? existingExpense.category,
+      date: body.date ?? existingExpense.date,
+      note: body.note ?? existingExpense.note,
+    });
+    
+    if (hasValidationErrors(validationErrors)) {
+      const firstError = getFirstValidationError(validationErrors);
+      return NextResponse.json(
+        { error: 'Validation Error', message: firstError, errors: validationErrors },
+        { status: 400 }
+      );
     }
 
     // Update expense
@@ -88,9 +69,10 @@ export async function PUT(
 
     if (updateError) {
       console.error('Error updating expense:', updateError);
+      const appError = handleSupabaseError(updateError);
       return NextResponse.json(
-        { error: 'Database Error', message: 'Failed to update expense' },
-        { status: 500 }
+        { error: appError.type, message: appError.message },
+        { status: appError.statusCode }
       );
     }
 
@@ -98,13 +80,7 @@ export async function PUT(
       { data: updatedExpense, message: 'Expense updated successfully' },
       { status: 200 }
     );
-  } catch (error) {
-    console.error('Unexpected error in PUT /api/expenses/[id]:', error);
-    return NextResponse.json(
-      { error: 'Internal Server Error', message: 'An unexpected error occurred' },
-      { status: 500 }
-    );
-  }
+  });
 }
 
 // DELETE /api/expenses/[id] - Delete expense
@@ -112,19 +88,8 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  try {
+  return withAuth(request, async (user) => {
     const supabase = await createServerClient();
-
-    // Check authentication
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'Unauthorized', message: 'You must be logged in to delete expenses' },
-        { status: 401 }
-      );
-    }
-
     const { id } = await params;
 
     // Verify ownership before deletion
@@ -136,8 +101,9 @@ export async function DELETE(
       .single();
 
     if (fetchError || !existingExpense) {
+      const appError = handleSupabaseError(fetchError || new Error('Not found'));
       return NextResponse.json(
-        { error: 'Not Found', message: 'Expense not found or you do not have permission to delete it' },
+        { error: appError.type, message: 'Expense not found or you do not have permission to delete it' },
         { status: 404 }
       );
     }
@@ -151,9 +117,10 @@ export async function DELETE(
 
     if (deleteError) {
       console.error('Error deleting expense:', deleteError);
+      const appError = handleSupabaseError(deleteError);
       return NextResponse.json(
-        { error: 'Database Error', message: 'Failed to delete expense' },
-        { status: 500 }
+        { error: appError.type, message: appError.message },
+        { status: appError.statusCode }
       );
     }
 
@@ -161,11 +128,5 @@ export async function DELETE(
       { message: 'Expense deleted successfully', success: true },
       { status: 200 }
     );
-  } catch (error) {
-    console.error('Unexpected error in DELETE /api/expenses/[id]:', error);
-    return NextResponse.json(
-      { error: 'Internal Server Error', message: 'An unexpected error occurred' },
-      { status: 500 }
-    );
-  }
+  });
 }

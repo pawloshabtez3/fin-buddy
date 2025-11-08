@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import { Expense, AIInsightsResponse } from '@/lib/types';
+import { toast } from '@/lib/toast';
+import { retryWithBackoff, parseError } from '@/lib/errors';
 
 interface AIInsightsProps {
   expenses: Expense[];
@@ -11,31 +13,44 @@ export function AIInsights({ expenses }: AIInsightsProps) {
   const [insights, setInsights] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isRetryable, setIsRetryable] = useState(false);
 
   const generateInsights = async () => {
     setIsLoading(true);
     setError(null);
 
     try {
-      const response = await fetch('/api/insights', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ expenses }),
-      });
+      // Use retry logic for network errors
+      const data = await retryWithBackoff(async () => {
+        const response = await fetch('/api/insights', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ expenses }),
+        });
 
-      const data = await response.json();
+        const responseData = await response.json();
 
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to generate insights');
-      }
+        if (!response.ok) {
+          const error: any = new Error(responseData.message || 'Failed to generate insights');
+          error.statusCode = response.status;
+          error.isRetryable = responseData.isRetryable || false;
+          throw error;
+        }
+
+        return responseData;
+      }, 2, 1000); // Max 2 retries with 1 second initial delay
 
       const insightsData: AIInsightsResponse = data.data;
       setInsights(insightsData.insights);
+      toast.success('Insights generated successfully!');
     } catch (err) {
       console.error('Error generating insights:', err);
-      setError(err instanceof Error ? err.message : 'An unexpected error occurred');
+      const { message, isRetryable: retryable } = parseError(err);
+      setError(message);
+      setIsRetryable(retryable);
+      toast.error(message);
     } finally {
       setIsLoading(false);
     }
@@ -119,12 +134,14 @@ export function AIInsights({ expenses }: AIInsightsProps) {
             <div className="flex-1">
               <h3 className="text-sm font-medium text-red-800 mb-1">Error generating insights</h3>
               <p className="text-sm text-red-700">{error}</p>
-              <button
-                onClick={handleRetry}
-                className="mt-3 text-sm font-medium text-red-800 hover:text-red-900 underline"
-              >
-                Try again
-              </button>
+              {isRetryable && (
+                <button
+                  onClick={handleRetry}
+                  className="mt-3 text-sm font-medium text-red-800 hover:text-red-900 underline"
+                >
+                  Try again
+                </button>
+              )}
             </div>
           </div>
         </div>

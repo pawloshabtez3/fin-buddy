@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { Expense, ExpenseInput, EXPENSE_CATEGORIES } from '@/lib/types';
+import { toast } from '@/lib/toast';
+import { parseError } from '@/lib/errors';
 
 interface ExpenseFormProps {
   expense?: Expense | null;
@@ -49,6 +51,12 @@ export function ExpenseForm({ expense, onSubmit, onCancel, isLoading = false }: 
     }
 
     setErrors(newErrors);
+    
+    // Show validation errors as toast
+    if (Object.keys(newErrors).length > 0) {
+      toast.error('Please fix the form errors before submitting');
+    }
+    
     return Object.keys(newErrors).length === 0;
   };
 
@@ -63,6 +71,9 @@ export function ExpenseForm({ expense, onSubmit, onCancel, isLoading = false }: 
     try {
       await onSubmit(formData);
       
+      // Show success message
+      toast.success(expense ? 'Expense updated successfully' : 'Expense added successfully');
+      
       // Reset form only if creating new expense (not editing)
       if (!expense) {
         setFormData({
@@ -75,6 +86,8 @@ export function ExpenseForm({ expense, onSubmit, onCancel, isLoading = false }: 
       setErrors({});
     } catch (error) {
       console.error('Error submitting form:', error);
+      const { message } = parseError(error);
+      toast.error(message);
     } finally {
       setIsSubmitting(false);
     }

@@ -6,10 +6,14 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "build:test": "npm run lint && npm run build",
+    "prod:test": "npm run build && npm start",
+    "verify-env": "node scripts/verify-env.js"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
+    "@supabase/ssr": "^0.7.0",
     "@supabase/supabase-js": "^2.80.0",
     "next": "^15.0.3",
     "react": "^18.3.1",

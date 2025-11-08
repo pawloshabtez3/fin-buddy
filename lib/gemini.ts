@@ -1,5 +1,6 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { Expense } from './types';
+import { handleGeminiError } from './errors';
 
 // Initialize the Gemini API client
 const apiKey = process.env.GEMINI_API_KEY || '';
@@ -47,14 +48,14 @@ Please format your response in a clear, friendly, and encouraging tone. Keep it 
     const result = await Promise.race([
       model.generateContent(prompt),
       new Promise<never>((_, reject) => 
-        setTimeout(() => reject(new Error('Request timeout')), 30000)
+        setTimeout(() => reject(new Error('Request timeout - AI service took too long to respond')), 30000)
       )
     ]);
 
     const response = await result.response;
     const text = response.text();
 
-    if (!text) {
+    if (!text || text.trim().length === 0) {
       throw new Error('Empty response from Gemini API');
     }
 
@@ -62,11 +63,9 @@ Please format your response in a clear, friendly, and encouraging tone. Keep it 
   } catch (error) {
     console.error('Error generating spending insights:', error);
     
-    if (error instanceof Error) {
-      throw new Error(`Failed to generate insights: ${error.message}`);
-    }
-    
-    throw new Error('Failed to generate insights: Unknown error');
+    // Convert to AppError for consistent error handling
+    const appError = handleGeminiError(error);
+    throw appError;
   }
 }
 

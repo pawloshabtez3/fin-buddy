@@ -6,6 +6,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recha
 
 interface ExpenseChartProps {
   expenses: Expense[];
+  currency?: string;
 }
 
 const COLORS = [
@@ -21,7 +22,7 @@ const COLORS = [
   '#84CC16', // lime
 ];
 
-export function ExpenseChart({ expenses }: ExpenseChartProps) {
+export function ExpenseChart({ expenses, currency = 'USD' }: ExpenseChartProps) {
   const chartData = useMemo(() => {
     const now = new Date();
     const currentMonth = now.getMonth();
@@ -56,7 +57,7 @@ export function ExpenseChart({ expenses }: ExpenseChartProps) {
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'USD',
+      currency: currency,
     }).format(value);
   };
 

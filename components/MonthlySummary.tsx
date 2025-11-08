@@ -5,9 +5,10 @@ import { useMemo } from 'react';
 
 interface MonthlySummaryProps {
   expenses: Expense[];
+  currency?: string;
 }
 
-export function MonthlySummary({ expenses }: MonthlySummaryProps) {
+export function MonthlySummary({ expenses, currency = 'USD' }: MonthlySummaryProps) {
   const { total, month, year } = useMemo(() => {
     const now = new Date();
     const currentMonth = now.getMonth();
@@ -38,7 +39,7 @@ export function MonthlySummary({ expenses }: MonthlySummaryProps) {
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'USD',
+      currency: currency,
     }).format(amount);
   };
 

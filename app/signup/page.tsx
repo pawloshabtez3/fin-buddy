@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, FormEvent } from 'react';
-import { supabase } from '@/lib/supabaseClient';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
@@ -50,21 +49,24 @@ export default function SignupPage() {
     setLoading(true);
 
     try {
-      const { data, error: signupError } = await supabase.auth.signUp({
-        email,
-        password,
+      const response = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
       });
 
-      if (signupError) {
-        setError(signupError.message);
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.error || 'Signup failed');
         setLoading(false);
         return;
       }
 
-      if (data.user) {
-        // Success - redirect to dashboard
-        router.push('/dashboard');
-      }
+      // Force a hard navigation to ensure cookies are properly set
+      window.location.href = '/dashboard';
     } catch (err) {
       setError('An unexpected error occurred. Please try again.');
       setLoading(false);
