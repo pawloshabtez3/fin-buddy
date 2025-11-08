@@ -197,34 +197,56 @@
     - Show error message with retry option on failure
     - _Requirements: 8.1, 8.4, 8.5_
 
-- [ ] 9. Build user profile management
-  - [ ] 9.1 Create profile API routes
+- [x] 9. Build user profile management
+
+
+
+
+
+  - [x] 9.1 Create profile API routes
+
     - Implement GET /api/profile to fetch user profile
     - Implement PUT /api/profile to update name and currency
     - Implement DELETE /api/profile for account deletion
     - _Requirements: 9.1, 9.2, 11.2, 11.3, 11.4_
-  - [ ] 9.2 Create profile page UI
+  - [x] 9.2 Create profile page UI
+
+
     - Build form to display and edit name and preferred currency
     - Add account deletion button with confirmation dialog
     - Integrate with profile API routes
     - Display currency throughout app based on preference
     - _Requirements: 9.1, 9.2, 9.3, 9.4, 11.1, 11.2, 11.5_
 
-- [ ] 10. Create dashboard page and layout
-  - [ ] 10.1 Build main dashboard page
+- [x] 10. Create dashboard page and layout
+
+
+
+
+
+  - [x] 10.1 Build main dashboard page
+
+
     - Create app/dashboard/page.tsx as server component
     - Fetch initial expense data server-side
     - Render MonthlySummary, ExpenseChart, SpendingTrend, AIInsights
     - Pass data to client components as props
     - _Requirements: 5.2, 6.2, 7.2, 8.4_
-  - [ ] 10.2 Create app layout with navigation
+  - [x] 10.2 Create app layout with navigation
+
+
     - Build root layout.tsx with auth check
     - Create Navigation component with links to dashboard and profile
     - Add logout button to navigation
     - Implement redirect logic for unauthenticated users
     - _Requirements: 1.4, 10.1, 10.3, 10.4_
 
-- [ ] 11. Implement error handling and validation
+- [x] 11. Implement error handling and validation
+
+
+
+
+
   - Create standardized error response types
   - Add form validation error displays
   - Implement toast notifications for network errors
@@ -232,7 +254,15 @@
   - Handle Supabase and Gemini API errors gracefully
   - _Requirements: 2.4, 4.3, 8.5_
 
-- [ ] 12. Add data aggregation utility functions
+- [x] 12. Add data aggregation utility functions
+
+
+
+
+
+
+
+
   - Create function to calculate monthly summary from expenses
   - Create function to aggregate expenses by category
   - Create function to generate daily spending totals
